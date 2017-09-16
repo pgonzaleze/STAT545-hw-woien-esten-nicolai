@@ -3,4 +3,4 @@
 
 Hello world, pleased to have you here. 
 
-Concerning how I made the changes, all of the above were changed on github, while this is changes locally. I pulled, changed locally, committed and pushed. Of course pushing always implies pulling and then pushing, for good practice ;) 
+Concerning how I made the changes, all of the above were changed on github, while this is a local change. I pulled, changed the file locally, committed and then pushed. Of course pushing always implies pulling and then pushing, for good practice ;) 
