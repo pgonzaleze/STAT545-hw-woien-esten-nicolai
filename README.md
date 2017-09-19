@@ -23,7 +23,7 @@ On non-school related interests, I love to hike, run, ski (cross-contry, alpine,
 2. Changed the README on github
 3. All other changed were done locally inside RStudio
 
-Concerning the process with R Markdown and github, I had some trouble supressing the output when loading libraries. I expected 
+Concerning the process with R Markdown and github, I've uploaded some R Markdown Testing in both [md](R_Markdown_testing.md) and [Rmd](R_markdown_testing.Rmd). I had some trouble supressing the output when loading libraries. I expected 
 ````
 ```{r, results='hide'}
 code
@@ -36,3 +36,4 @@ code
 ```
 ````
 It is really nice to have the option to differentiate between results, messages, warnings and errors though.
+
