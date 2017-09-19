@@ -100,10 +100,10 @@ There are a ton of ways to plot the data. You can scatter the data, of plot hist
 plot(lifeExp ~ log10(gdpPercap), gapminder, ylab = 'Life expectancy', xlab = 'log10( GPD per capita )')
 ```
 
-![](R_Markdown_Testing_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-6-1.png)
+![](hw01_gapminder_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-6-1.png)
 
 ``` r
 boxplot(lifeExp ~ year, gapminder, ylab = 'Life expectancy', xlab = 'Year')
 ```
 
-![](R_Markdown_Testing_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-6-2.png)
+![](hw01_gapminder_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-6-2.png)
