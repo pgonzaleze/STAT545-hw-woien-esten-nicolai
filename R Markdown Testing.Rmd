@@ -1,0 +1,58 @@
+---
+title: "HM 01 Gapminder Exploration,"
+output: github_document
+---
+
+*Basic care and feeding of data in R*
+
+## Relevant Packages
+
+We will now load some from the gapminder and tidyverse packages. This is easily done by the following functions.
+
+```{r, message=FALSE, warning=FALSE}
+library("gapminder")
+library("tidyverse")
+```
+
+## Analyzing Data
+
+Now that the Gapminder data is loaded, we can analyze the data in several ways.
+
+### Printing Data
+
+The data frame can be printed in many ways. By just typing the name of the data frame, R calls the objects default printing call. The information we obtain can be different depening on the object. For basic data frames like Gapminder, it prints the first few rows of data.
+
+```{r}
+gapminder
+```
+
+
+The first few rows of data can also be printed by calling the head() function. Here you can speficy what number of rows you want to be printed. 
+
+```{r}
+head(gapminder, n = 3)
+```
+
+
+Similarly, the last few rows can be printed with the tail() function.
+
+```{r}
+tail(gapminder, n = 5)
+```
+
+If you want som general information about the data frame, you can use the summary() function. Again, this produces a different output depending on the objects. For example, for a regression object, it prints the regression coefficient together with measures of significance for the model. For data frames, it prints information about what kind of data the data frame includes, and how much data there are.
+
+```{r}
+summary(gapminder)
+```
+
+
+### Plotting Data
+
+There are a ton of ways to plot the data. You can scatter the data, of plot histograms, box plots and so fourth. Below, we have scattered the GDP per capita (on log scale) vs life expectancy, and made a box plot of year vs life expectancy.
+
+```{r}
+plot(lifeExp ~ log10(gdpPercap), gapminder, ylab = 'Life expectancy', xlab = 'log10( GPD per capita )')
+boxplot(lifeExp ~ year, gapminder, ylab = 'Life expectancy', xlab = 'Year')
+
+```
