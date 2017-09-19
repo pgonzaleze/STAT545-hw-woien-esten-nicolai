@@ -28,7 +28,7 @@ On non-school related interests, I love to hike, run, ski (cross-contry, alpine,
         c. *push*
     - *As I were the only one doing the commits, there were no conflicts*
 
-Concerning the process with R Markdown and github, I've uploaded some R Markdown Testing in both [md](R_Markdown_testing.md) and [Rmd](R markdown testing.Rmd) formats. I had some trouble supressing the output when loading libraries. I expected 
+Concerning the process with R Markdown and github, I've uploaded some R Markdown Testing in both [md](hw01_gapminder.md) and [Rmd](hw01_gapminder.Rmd) formats. I had some trouble supressing the output when loading libraries. I expected 
 ````
 ```{r, results='hide'}
 code
