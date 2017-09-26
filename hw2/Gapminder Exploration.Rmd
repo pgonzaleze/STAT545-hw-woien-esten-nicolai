@@ -1,0 +1,148 @@
+---
+title: "Gapminder Exploration"
+output: html_document
+---
+
+### Abstract
+We are going to explore the gapminder data set included with R. We will start with importing the data set, and analyzing what data types the data consists of. Then, we will do some basic visual analisis of the data set using ggplot.
+
+### Table of content
+* [1 Data Set Basics](#data-set-basics)
+    * [1.1 Installation](#installation)
+    * [1.2 Data Types](#installation)
+* [2 Data Analysis](#data-visualization)
+    * [2.1 Life Expectancy](#life-expectancy)
+
+## 1 Data Set Basics
+### 1.1 Installation
+[*Back to the top*](#abstract)
+
+The gapminder data set is a package in itself, and should therefore be included in the workspace the normal way, i.e.
+```{r, warning=FALSE, message=FALSE}
+library(gapminder)
+library(tidyverse)
+```
+As you might noticed, we also included the tidyverse package. In general, tidyverse is a very useful package and is useful in almost all circumstances. In addition, we need ggplot from the tidyverse later in this exploration, so we might as well include it immediately.
+
+
+### 1.2 Data Types
+[*Back to the top*](#abstract)
+
+To get an understanding of the gapminder dataset it's important to know what data types the dataset exists of.
+```{r}
+str(gapminder)
+```
+As one can see, the gapminder data set can be seen as both a tibble and a data frame. I've understood that a tibble class is a "polished" version of the data frame class. Feel free to let me know if otherwise. The data set has 1704 observations of 6 variables. The variables are as follows,
+
+| Variable name | Data type     |
+| ------------- | ------------- |
+| country   | Factor |
+| continent | Factor |
+| year      | int |
+| lifeExp   | num |
+| pop       | int |
+| gdpPercap | num |
+
+Note that in R, num is equivalent to double in other languages. There are a lot of ways to disect this data, but I feel that str() gives me what I want. Other ways are 
+```{r, results='hide'}
+class(gapminder)
+summary(gapminder)
+head(gapminder,n=1)
+```
+It seems like there are 12 observations from each contry, ranging from 1952 to 2007. Can this be confirmed?
+```{r}
+number.of.observations.per.country <- table(gapminder$country)
+var(number.of.observations.per.country)
+table(gapminder$year)
+```
+We have already seen that there is 12 observations from at least one coutry. Therefore, when the variance of the number of observations per country is zero, this means that all countries have 12 observations. Further, the last command line shows that each year, there are consistently 142 observations. 
+
+## 2 Data Visualization
+### 2.1 Life Expectancy
+[*Back to the top*](#abstract)
+
+We will now take a look at the life expecancy variable specifically. As seen, the life expecancy is of type decimal number. We can have see basic properties of the life expectancy data by using summary after selecting the lifeExp variable.
+```{r}
+gapminder %>% 
+  select(lifeExp) %>% 
+  summary()
+```
+This code finds the 0.00, 0.25, 0.50, 0.75 and 1.00 quantiles and for the life expectancy for all contries and all years. It could be interesting to observe how this data changes over time.
+
+
+<style>
+.column-left{
+  float: left;
+  width: 50%;
+  text-align: left;
+}
+.column-right{
+  float: right;
+  width: 49%;
+  text-align: left;
+}
+</style>
+
+<div class="column-left">
+```{r,warning=FALSE}
+gapminder %>% 
+  filter(year == 1952) %>% 
+  select(lifeExp) %>% 
+  summary()
+```
+</div>
+
+<div class="column-right">
+```{r,warning=FALSE}
+gapminder %>% 
+  filter(year == 2007) %>% 
+  select(lifeExp) %>% 
+  summary()
+```
+</div>
+
+
+As you can see, all quantiles and the mean are greater in 2007 than 1952, indicating a positive development. Click [here](https://stackoverflow.com/questions/31753897/2-column-section-in-r-markdown) if you would like to know how the two column code was made. 
+
+It could also be nice to have some visualizations of the data. An estimation of the distribution of the life expectancy for a given decade is plotted below.
+
+```{r, warning=FALSE}
+p3 <- gapminder %>% 
+  mutate(decade=floor(year/10)*10) %>% 
+  ggplot(aes(x=lifeExp))
+
+p3 + 
+  geom_density(aes(fill=factor(decade),color=factor(decade)),alpha=0.1) + 
+  xlim(20,90) + ylim(0,0.045) + xlab("Life Expectancy") + ylab("Estimated Density")
+```
+
+
+
+
+```{r}
+p2 <- gapminder %>% 
+  group_by(year) %>%
+  mutate(q.1 = quantile(lifeExp,0.1),
+         q.5 = quantile(lifeExp,0.5),
+         q.9 = quantile(lifeExp,0.9)) %>% 
+  ggplot(aes(x=year))
+
+p2 + 
+  geom_ribbon(aes(ymin=q.1, ymax=q.9),fill='black',alpha=0.2) +
+  geom_line(aes(y=q.5),size=0.5,color='red')
+```
+
+
+
+
+```{r}
+p4 <- gapminder %>% 
+  group_by(continent) %>% 
+  ggplot(aes(x=year, y=pop))
+
+#p4 + geom_histogram(position='fill')
+```
+
+
+
+
