@@ -3,6 +3,8 @@ Gapminder Exploration
 
 ### Abstract
 
+[Back to folder](..)
+
 We are going to explore the gapminder data set included with R. We will start with importing the data set, and analyzing what data types the data consists of. Then, we will do some basic visual analisis of the data set using ggplot.
 
 ### Table of content
