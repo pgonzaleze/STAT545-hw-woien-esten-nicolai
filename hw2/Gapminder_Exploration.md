@@ -144,9 +144,9 @@ Of course, there are not 624 countries in Africa, and the number of countries in
 
 ``` r
 gapminder %>% 
-  filter(year==1952) %>% 
-  select(continent) %>% 
-  summary()
+  filter(year==1952) %>% # Extract only the data with year 1952
+  select(continent)  %>% # Select the continent
+  summary()              # Summarize the data
 ```
 
     ## Warning: package 'bindrcpp' was built under R version 3.2.5
@@ -162,9 +162,9 @@ That makes more sense. Note that doing the same for the other 11 years, yields t
 
 ``` r
 gapminder %>% 
-  ggplot(aes(x=continent, y=lifeExp)) +
-  geom_boxplot(aes(fill=continent)) +
-  xlab('Continent') + ylab('Life Expectancy')
+  ggplot(aes(x=continent, y=lifeExp)) +       # Choose variables for x and y axis
+  geom_boxplot(aes(fill=continent)) +         # Add a box plot and specify colors
+  xlab('Continent') + ylab('Life Expectancy') # Change labels
 ```
 
 ![](Gapminder_Exploration_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-7-1.png)
@@ -173,9 +173,9 @@ As one can see, the life expectancy data from each continent seems to be very di
 
 ``` r
 gapminder %>% 
-  ggplot(aes(x=factor(year), y=lifeExp)) +
-  facet_grid(~continent) +
-  geom_boxplot(aes(fill=continent)) +
+  ggplot(aes(x=factor(year), y=lifeExp)) +      # Choose variables for x and y axis
+  facet_grid(~continent) +                      # Create multiple subplots with one continent for each
+  geom_boxplot(aes(fill=continent)) +           # Add boxplot
   xlab('Continent') + ylab('Life Expectancy') + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -255,10 +255,15 @@ It could also be nice to have some visualizations of the data. An estimation of 
 ``` r
 gapminder %>% 
   mutate(decade = factor(10*floor(year/10),
-                         labels=c('50s', '60s', '70s', '80s', '90s', '00s'))) %>% 
-  ggplot(aes(x=lifeExp)) + 
-  geom_density(aes(fill=decade,
-                   color=decade), alpha=0.05) + 
+                         labels=c('50s',
+                                  '60s',
+                                  '70s', 
+                                  '80s', 
+                                  '90s', 
+                                  '00s'))) %>%  # Create a new variable with the decade
+  ggplot(aes(x=lifeExp)) +                      # Choose variables for x axis
+  geom_density(aes(fill=decade,                
+                   color=decade), alpha=0.05) + # Add density plot colored by decade
   xlim(20,90) + xlab("Life Expectancy") + ylab("Estimated Density")
 ```
 
@@ -270,10 +275,10 @@ The trend of countries increasing their life expectancy is quite obvious. Still,
 
 ``` r
 gapminder %>% 
-  filter(year %in% c(max(year), min(year))) %>% 
-  ggplot(aes(x=lifeExp)) + 
+  filter(year %in% c(max(year), min(year))) %>% # Extract only the extremas of year
+  ggplot(aes(x=lifeExp)) +                      # Choose variables for x axis
   geom_density(aes(fill=factor(year), 
-                   color=factor(year)), 
+                   color=factor(year)),         # Add density plot colored by decade
                alpha=0.05) + 
   xlim(20,90) + ylim(0,0.045) + xlab("Life Expectancy") + ylab("Estimated Density")
 ```
@@ -284,11 +289,11 @@ Based on the the previous plot, this plot was not unexpected. However, these plo
 
 ``` r
 gapminder %>% 
-  filter(year %in% c(max(year), min(year))) %>% 
-  ggplot(aes(x=lifeExp)) + 
-  geom_density(aes(weight=pop, 
+  filter(year %in% c(max(year), min(year))) %>% # Extract only the extremas of year
+  ggplot(aes(x=lifeExp)) +                      # Choose variables for x axis
+  geom_density(aes(weight=pop,
                    fill=factor(year), 
-                   color=factor(year)), 
+                   color=factor(year)),         # Add density plot weighted by population
                alpha=0.05) + 
   xlim(20,90) + xlab("Life Expectancy") + ylab("Estimated Density")
 ```
@@ -299,15 +304,15 @@ This did not work. As you can see, the distribution surely doesn't integrate to 
 
 ``` r
 p <- gapminder %>% 
-  filter(year %in% c(max(year), min(year))) %>% 
-  group_by(year) %>%
-  mutate(pop.density = pop/sum(as.numeric(pop)))
+  filter(year %in% c(max(year), min(year))) %>%  # Extract only the extremas of year
+  group_by(year) %>%                             # Group all data points with same year together
+  mutate(pop.density = pop/sum(as.numeric(pop))) # New variable with the proportional population for each year
   
 p %>% 
   ggplot(aes(x=lifeExp)) + 
   geom_density(aes(weight=pop.density, 
-                     fill=factor(year), 
-                     color=factor(year)), alpha=0.05) + 
+                   fill=factor(year), 
+                   color=factor(year)), alpha=0.05) + 
   xlim(20,90) + xlab("Life Expectancy") + ylab("Estimated Density")
 ```
 
@@ -332,15 +337,15 @@ Further, one can plot the quantiles of the life expecancy. Below, lines for life
 ``` r
 p2 <- gapminder %>% 
   group_by(year) %>%
-  mutate(q.1 = quantile(lifeExp,0.1),
+  mutate(q.1 = quantile(lifeExp,0.1),    
          q.5 = quantile(lifeExp,0.5),
-         q.9 = quantile(lifeExp,0.9)) %>% 
-  ggplot(aes(x=year))
+         q.9 = quantile(lifeExp,0.9)) %>% # Compute median and 0.1 and 0.9 quantiles
+  ggplot(aes(x=year))                     # Choose variable for x axis
 
 p2 + 
-  geom_line(aes(y=lifeExp, group=country), alpha=0.1) +
-  geom_ribbon(aes(ymin=q.1, ymax=q.9),alpha=0.5) +
-  geom_line(aes(y=q.5),size=0.5,color='red') + 
+  geom_line(aes(y=lifeExp, group=country), alpha=0.1) + # Plot one line for each country
+  geom_ribbon(aes(ymin=q.1, ymax=q.9),alpha=0.5) +      # Add ribbon for a quantile based 80% conf.int.
+  geom_line(aes(y=q.5),size=0.5,color='red') +          # Add line plot of the median
   xlab("Year") + ylab("Life Expectancy")
 ```
 
@@ -350,8 +355,8 @@ As one can see, the median life expecancy is increasing much faster than the 10 
 
 ``` r
 gapminder %>% 
-  filter(year==1977) %>% 
-  filter(lifeExp==min(lifeExp)) %>% 
+  filter(year==1977) %>%            # Select the year we are interested in
+  filter(lifeExp==min(lifeExp)) %>% # Extract the data point with the minimum life Expectancy
   select(country)
 ```
 
@@ -362,8 +367,8 @@ gapminder %>%
 
 ``` r
 gapminder %>% 
-  filter(year==1992) %>% 
-  filter(lifeExp==min(lifeExp)) %>% 
+  filter(year==1992) %>%            # Select the year we are interested in
+  filter(lifeExp==min(lifeExp)) %>% # Extract the data point with the minimum life Expectancy
   select(country)
 ```
 
