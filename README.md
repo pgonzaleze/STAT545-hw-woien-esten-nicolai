@@ -1,8 +1,8 @@
 # STAT545 Homework Repo
 This is the repo used for the homeworks in STAT545. Below, you'll find links to the homeworks, as well as some info about myself.
 
-* [Homework 1](#hw1)
-* [Homework 2](#hw2)
+* [Homework 1](hw1)
+* [Homework 2](hw2)
 
 
 
