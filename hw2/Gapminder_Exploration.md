@@ -3,8 +3,6 @@ Gapminder Exploration
 
 ### Abstract
 
-[*Back to folder*](../)
-
 We are going to explore the gapminder data set included with R. We will start with importing the data set, and analyzing what data types the data consists of. Then, we will do some basic visual analisis of the data set using ggplot.
 
 ### Table of content
@@ -341,7 +339,7 @@ p2 <- gapminder %>%
 
 p2 + 
   geom_line(aes(y=lifeExp, group=country), alpha=0.1) +
-  geom_ribbon(aes(ymin=q.1, ymax=q.9),fill='black',alpha=0.5) +
+  geom_ribbon(aes(ymin=q.1, ymax=q.9),alpha=0.5) +
   geom_line(aes(y=q.5),size=0.5,color='red') + 
   xlab("Year") + ylab("Life Expectancy")
 ```
@@ -374,7 +372,7 @@ gapminder %>%
     ##    <fctr>
     ## 1  Rwanda
 
-Brutally enough, these datas matches well with the genosides in Cambodia and Rwanda in given time spans.
+Brutally enough, these datas matches the genosides in Cambodia and Rwanda in given time spans quite well.
 
 2.3 Afghanistan and Rwanda
 --------------------------
@@ -403,7 +401,7 @@ filter(gapminder, country == c("Rwanda", "Afghanistan"))
     ## 11      Rwanda    Africa  1992  23.599  7290203  737.0686
     ## 12      Rwanda    Africa  2002  43.413  7852401  785.6538
 
-It would seem like the extraction worked. However, notice that there are only 12 data points, while it shoud be 24. As one can see, only the data with year ending with 7 is from Afghanistan while only the data with year ending with 2 is from Rwanda. So why is this? The statement
+It would seem like the extraction worked. However, notice that there are only 12 data points, while it should be 24. As one can see, only the data with year ending with 7 is from Afghanistan while only the data with year ending with 2 is from Rwanda. So why is this? The statement
 
 ``` r
 country == c("Rwanda", "Afghanistan")

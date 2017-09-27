@@ -122,9 +122,16 @@ $(document).ready(function () {
 <div id="homework-2" class="section level1">
 <h1>Homework 2</h1>
 <p><em>Esten Nicolai Wøien</em></p>
-<div id="introduction" class="section level3">
-<h3>Introduction</h3>
-<p>This folder contains all work reletant to homework 2 in STAT 545.</p>
+<p>Relevant files:</p>
+<ul>
+<li><a href="Gapminder-Exploration.md" class="uri">Gapminder-Exploration.md</a></li>
+<li><a href="Gapminder%20Exploration.Rmd">Gapminder Exploration.Rmd</a></li>
+</ul>
+<p>This is the folder for homework 2 in STAT 545. The final product of the work can be found in the file <a href="Gapminder-Exploration.md" class="uri">Gapminder-Exploration.md</a>. R Markdown were used to produce the document, and the raw R Markdown file can be found <a href="Gapminder%20Exploration.Rmd">here</a>.</p>
+<div id="process-report" class="section level2">
+<h2>Process Report</h2>
+<p>This homework were really fun! However, I found myself spending way too much time just playing with the data and plotting functions. I find tidyverse to be a library with a very (!) high level of abstraction. This simplifies things alot. For example, for the quantile based confidence interval (in section 2.2 in the <a href="Gapminder-Exploration.md">Gapminder Exploration</a>), I found geom_ribbon at the <a href="https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf">ggplot2 cheat sheet</a>, used ?geom_ribbon to figure out how to use it, and wrote the code. Even though we haven’t used geom_ribbon in class it felt really easy to use, and it worked immediately. Amazing.</p>
+<p>But the high level of abstraction can also be problematic. When I tried to weight the data points when making a distribution plot (in section 2.2 in the <a href="Gapminder-Exploration.md">Gapminder Exploration</a>), I really struggled with converting the population to a proportional population for a given year (i.e. “population” that sums to 1). Because I’m still in the experimentation phase, it didn’t occur to me that I needed to group the data by year before I could sum the data for a given year. I finaly figured it out, see the said section for my solution.</p>
 </div>
 </div>
 
