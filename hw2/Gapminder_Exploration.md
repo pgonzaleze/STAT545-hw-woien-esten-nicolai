@@ -3,7 +3,7 @@ Gapminder Exploration
 
 ### Abstract
 
-[Back to folder](..)
+[*Back to folder*](../)
 
 We are going to explore the gapminder data set included with R. We will start with importing the data set, and analyzing what data types the data consists of. Then, we will do some basic visual analisis of the data set using ggplot.
 
@@ -165,28 +165,32 @@ That makes more sense. Note that doing the same for the other 11 years, yields t
 ``` r
 gapminder %>% 
   ggplot(aes(x=continent, y=lifeExp)) +
-  geom_boxplot(aes(fill=continent))
+  geom_boxplot(aes(fill=continent)) +
+  xlab('Continent') + ylab('Life Expectancy')
 ```
 
 ![](Gapminder_Exploration_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-7-1.png)
 
-We can even use box plots to study how the life expetcancy changes over the years
+As one can see, the life expectancy data from each continent seems to be very different. In general, Europe and Oceania have higher life expectancies, while Africa and Asia has lower. The variance of the data is also higher when the median is lower. However, the higher variance probably has a lot to with the number of countries in each continent. There could also be a lot of variance from year to year.
 
 ``` r
 gapminder %>% 
   ggplot(aes(x=factor(year), y=lifeExp)) +
   facet_grid(~continent) +
-  geom_boxplot(aes(fill=continent)) + 
+  geom_boxplot(aes(fill=continent)) +
+  xlab('Continent') + ylab('Life Expectancy') + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 ![](Gapminder_Exploration_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-8-1.png)
 
+There is a lot of movement in the life expectancies for the different continents. In general, the trend is that it's increasing, but it also seems to flatten out when it reaches 70 years.
+
 ### 2.2 Life Expectancy
 
 [*Back to the top*](#abstract)
 
-We will now take a look at the life expecancy variable specifically. As seen, the life expecancy is of type decimal number. We can have see basic properties of the life expectancy data by using summary after selecting the lifeExp variable.
+We will now take a look at the life expecancy variable specifically. As seen, the life expecancy is of type decimal number. We can see basic properties of the life expectancy data by using summary after selecting the lifeExp variable.
 
 ``` r
 gapminder %>% 
