@@ -1,6 +1,6 @@
 ---
 title: "Gapminder Exploration"
-output: html_document
+output: github_document
 ---
 
 ### Abstract
@@ -141,64 +141,73 @@ gapminder %>%
 
 As you can see, all quantiles and the mean are greater in 2007 than 1952, indicating a positive development. Click [here](https://stackoverflow.com/questions/31753897/2-column-section-in-r-markdown) if you would like to know how the two column code was made. It uses CSS code but is easy to understand if you have some programming knowledge. 
 
-It could also be nice to have some visualizations of the data. An estimation of the distribution of the life expectancy for a every decade is plotted below.
+It could also be nice to have some visualizations of the data. An estimation of the distribution of the life expectancy is plotted below. Several distributions are plotted over time, but to limit the number of distributions, we plot for each decade, not year.
 
 ```{r, warning=FALSE}
 gapminder %>% 
-  mutate(decade=floor(year/10)*10) %>% # New variable specifying the decade
-  #filter(decade %in% c(max(decade), min(decade))) %>% 
+  mutate(decade = factor(10*floor(year/10),
+                         labels=c('50s', '60s', '70s', '80s', '90s', '00s'))) %>% 
   ggplot(aes(x=lifeExp)) + 
-  geom_density(aes(fill=factor(decade), 
-                   color=factor(decade)), 
+  geom_density(aes(fill=decade,
+                   color=decade), alpha=0.05) + 
+  xlim(20,90) + xlab("Life Expectancy") + ylab("Estimated Density")
+```
+
+Note that when specifying the colors, I forced the year to be a factor variable. This is because ggplot has a very pretty default color palette for factors, which works great with discretized variables (like decades).
+
+The trend of countries increasing their life expectancy is quite obvious. Still, even with decades only, the plot is somewhat chaotic. Let's instead focus on the first and last year of observation
+
+```{r, warning=FALSE}
+gapminder %>% 
+  filter(year %in% c(max(year), min(year))) %>% 
+  ggplot(aes(x=lifeExp)) + 
+  geom_density(aes(fill=factor(year), 
+                   color=factor(year)), 
                alpha=0.05) + 
   xlim(20,90) + ylim(0,0.045) + xlab("Life Expectancy") + ylab("Estimated Density")
 ```
 
-Note that I made the new variable "decade" a factor variable. This has two purpouses. First of all, the data is very discretized so it would make sence to have it in a data type reflecting that. In addition, ggplot's default colors for plotting factors suits this situation better then its default colors for plotting numerical values.
-
-As one can see, the distribution seems to shift over time. However, this distribution is estmated based on occurances per year, meaning the life expectancy of small countries like Norway is weighted the same as that of large countries as China. To coupe with this we could try to weight the data based on population.
+Based on the the previous plot, this plot was not unexpected. However, these plots can be misinterpreted. The distributions are estmated based on occurances per year, meaning the life expectancy of small countries like Norway is weighted the same as that of large countries as China. To coupe with this we could try to weight the data based on population.
 
 
 ```{r, warning=FALSE}
 gapminder %>% 
-  mutate(decade=floor(year/10)*10) %>% 
-  #filter(decade %in% c(max(decade), min(decade))) %>% 
+  filter(year %in% c(max(year), min(year))) %>% 
   ggplot(aes(x=lifeExp)) + 
   geom_density(aes(weight=pop, 
-                   fill=factor(decade), 
-                   color=factor(decade)), 
+                   fill=factor(year), 
+                   color=factor(year)), 
                alpha=0.05) + 
   xlim(20,90) + xlab("Life Expectancy") + ylab("Estimated Density")
 ```
 
-This did not work. As you can see, the distribution surely doesn't integrate to 1, and the total weight of the distribution increases over the decades. We clearly need a proportional population variable, which sums to 1 for each decade. This can be done in the following way
+This did not work. As you can see, the distribution surely doesn't integrate to 1, and the total weight of the distribution is much larger for 2007 than 1952. We clearly need a proportional population variable, which sums to 1 for each year. This can be done in the following way
 
 
 ```{r, warning=FALSE}
 p <- gapminder %>% 
-  mutate(decade=floor(year/10)*10) %>%
-  #filter(decade %in% c(max(decade), min(decade))) %>% 
-  group_by(decade) %>%
+  filter(year %in% c(max(year), min(year))) %>% 
+  group_by(year) %>%
   mutate(pop.density = pop/sum(as.numeric(pop)))
   
 p %>% 
   ggplot(aes(x=lifeExp)) + 
   geom_density(aes(weight=pop.density, 
-                     fill=factor(decade), 
-                     color=factor(decade)), alpha=0.05) + 
+                     fill=factor(year), 
+                     color=factor(year)), alpha=0.05) + 
   xlim(20,90) + xlab("Life Expectancy") + ylab("Estimated Density")
 ```
 
-Add group_by(decade) makes sum(as.numeric(pop)) sum over each decade. Therefore, the elements of pop.density for a given decade now sums to one. This can also be confirmed by
+Adding group_by(year) makes sum(as.numeric(pop)) sum over each year. Therefore, the elements of pop.density for a given year now sums to one. This can also be confirmed by
 ```{r}
 p %>% 
-  group_by(decade) %>% 
+  group_by(year) %>% 
   summarize(sum.pop.density = sum(pop.density))
 ```
 
 
 
-It seems like the shift in life expecancy is much better than previously anticitpated, which is really nice! Further, one can try to plot the quantiles of the life expecancy. Below, the median and a quantile based 80% confidence interval is plotted. As one can see, the median life expecancy is increasing much faster than the 10 and 90 percent quantiles. This indicates that there is not much to gain once you have a high life expectancy, and there still are countries struggeling with increasing their life expectancy. 
+Further, one can plot the quantiles of the life expecancy. Below, lines for life expectancy, the median and a quantile based 80% confidence interval is plotted. 
 
 
 
@@ -211,10 +220,35 @@ p2 <- gapminder %>%
   ggplot(aes(x=year))
 
 p2 + 
-  geom_ribbon(aes(ymin=q.1, ymax=q.9),fill='black',alpha=0.2) +
+  geom_line(aes(y=lifeExp, group=country), alpha=0.1) +
+  geom_ribbon(aes(ymin=q.1, ymax=q.9),fill='black',alpha=0.5) +
   geom_line(aes(y=q.5),size=0.5,color='red') + 
   xlab("Year") + ylab("Life Expectancy")
 ```
+
+As one can see, the median life expecancy is increasing much faster than the 10 and 90 percent quantiles. This indicates that there is not much to gain once you have a high life expectancy, and there still are countries struggeling with increasing their life expectancy. Also observe the two outliers for life expectancies in 1977 and 1992. From which countries are they recorded?
+
+<div class="column-left">
+```{r}
+gapminder %>% 
+  filter(year==1977) %>% 
+  filter(lifeExp==min(lifeExp)) %>% 
+  select(country)
+```
+</div>
+
+<div class="column-right">
+```{r}
+gapminder %>% 
+  filter(year==1992) %>% 
+  filter(lifeExp==min(lifeExp)) %>% 
+  select(country)
+```
+</div>
+
+Brutally enough, these datas matches well with the genosides in Cambodia and Rwanda in given time spans.
+
+
 
 
 ## 2.3 Afghanistan and Rwanda
