@@ -9,9 +9,11 @@ We are going to explore the gapminder data set included with R. We will start wi
 ### Table of content
 * [1 Data Set Basics](#data-set-basics)
     * [1.1 Installation](#installation)
-    * [1.2 Data Types](#installation)
-* [2 Data Analysis](#data-visualization)
-    * [2.1 Life Expectancy](#life-expectancy)
+    * [1.2 Data Types](#data-types)
+* [2 Data Analysis](#data-analysis)
+    * [2.1 Continent](#continent)
+    * [2.2 Life Expectancy](#life-expectancy)
+    * [2.3 Afghanistan and Rwanda](#afghanistan-and-rwanda)
 
 ## 1 Data Set Basics
 ### 1.1 Installation
@@ -36,29 +38,64 @@ As one can see, the gapminder data set can be seen as both a tibble and a data f
 
 | Variable name | Data type     |
 | ------------- | ------------- |
-| country   | Factor |
-| continent | Factor |
-| year      | int |
-| lifeExp   | num |
-| pop       | int |
-| gdpPercap | num |
+| country   | Categorical |
+| continent | Categorical |
+| year      | Integer |
+| lifeExp   | Decimal number |
+| pop       | Integer |
+| gdpPercap | Decimal number |
 
 Note that in R, num is equivalent to double in other languages. There are a lot of ways to disect this data, but I feel that str() gives me what I want. Other ways are 
-```{r, results='hide'}
+```{r}
 class(gapminder)
 summary(gapminder)
 head(gapminder,n=1)
 ```
-It seems like there are 12 observations from each contry, ranging from 1952 to 2007. Can this be confirmed?
+From the summary function it seems like there are 12 observations from each contry, ranging from 1952 to 2007. Can this be confirmed?
 ```{r}
 number.of.observations.per.country <- table(gapminder$country)
 var(number.of.observations.per.country)
 table(gapminder$year)
 ```
-We have already seen that there is 12 observations from at least one coutry. Therefore, when the variance of the number of observations per country is zero, this means that all countries have 12 observations. Further, the last command line shows that each year, there are consistently 142 observations. 
+We have already seen that there is 12 observations from at least one coutry. Therefore, when the variance of the number of observations per country is zero, this means that all countries have 12 observations. Further, the last command line shows that for each year there are 142 observations, which is additional evidence.  
 
 ## 2 Data Visualization
-### 2.1 Life Expectancy
+## 2.1 Continent
+[*Back to the top*](#abstract)
+
+As seen, the continent variable is of type Factor. This means that the values are categorical and the number of data points for each category can be found with the following code
+```{r}
+gapminder %>% 
+  select(continent) %>% 
+  summary()
+```
+
+Of course, there are not 624 countries in Africa, and the number of countries in the other continents are neither correct. To get the number of countries per continent in the data set, we need to check for a single year instead
+```{r}
+gapminder %>% 
+  filter(year==1952) %>% 
+  select(continent) %>% 
+  summary()
+```
+
+That makes more sense. Note that doing the same for the other 11 years, yields the same result. We can make box plots for each of the continents
+```{r}
+gapminder %>% 
+  ggplot(aes(x=continent, y=lifeExp)) +
+  geom_boxplot(aes(fill=continent))
+```
+
+We can even use box plots to study how the life expetcancy changes over the years
+```{r, fig.width=10}
+gapminder %>% 
+  ggplot(aes(x=factor(year), y=lifeExp)) +
+  facet_grid(~continent) +
+  geom_boxplot(aes(fill=continent)) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+### 2.2 Life Expectancy
 [*Back to the top*](#abstract)
 
 We will now take a look at the life expecancy variable specifically. As seen, the life expecancy is of type decimal number. We can have see basic properties of the life expectancy data by using summary after selecting the lifeExp variable.
@@ -67,7 +104,7 @@ gapminder %>%
   select(lifeExp) %>% 
   summary()
 ```
-This code finds the 0.00, 0.25, 0.50, 0.75 and 1.00 quantiles and for the life expectancy for all contries and all years. It could be interesting to observe how this data changes over time.
+This code finds the 0.00, 0.25, 0.50, 0.75 and 1.00 quantiles and for the life expectancy of the whole data set. It could be interesting to observe how this data changes over time.
 
 
 <style>
@@ -102,20 +139,66 @@ gapminder %>%
 </div>
 
 
-As you can see, all quantiles and the mean are greater in 2007 than 1952, indicating a positive development. Click [here](https://stackoverflow.com/questions/31753897/2-column-section-in-r-markdown) if you would like to know how the two column code was made. 
+As you can see, all quantiles and the mean are greater in 2007 than 1952, indicating a positive development. Click [here](https://stackoverflow.com/questions/31753897/2-column-section-in-r-markdown) if you would like to know how the two column code was made. It uses CSS code but is easy to understand if you have some programming knowledge. 
 
-It could also be nice to have some visualizations of the data. An estimation of the distribution of the life expectancy for a given decade is plotted below.
+It could also be nice to have some visualizations of the data. An estimation of the distribution of the life expectancy for a every decade is plotted below.
 
 ```{r, warning=FALSE}
-p3 <- gapminder %>% 
-  mutate(decade=floor(year/10)*10) %>% 
-  ggplot(aes(x=lifeExp))
-
-p3 + 
-  geom_density(aes(fill=factor(decade),color=factor(decade)),alpha=0.1) + 
+gapminder %>% 
+  mutate(decade=floor(year/10)*10) %>% # New variable specifying the decade
+  #filter(decade %in% c(max(decade), min(decade))) %>% 
+  ggplot(aes(x=lifeExp)) + 
+  geom_density(aes(fill=factor(decade), 
+                   color=factor(decade)), 
+               alpha=0.05) + 
   xlim(20,90) + ylim(0,0.045) + xlab("Life Expectancy") + ylab("Estimated Density")
 ```
 
+Note that I made the new variable "decade" a factor variable. This has two purpouses. First of all, the data is very discretized so it would make sence to have it in a data type reflecting that. In addition, ggplot's default colors for plotting factors suits this situation better then its default colors for plotting numerical values.
+
+As one can see, the distribution seems to shift over time. However, this distribution is estmated based on occurances per year, meaning the life expectancy of small countries like Norway is weighted the same as that of large countries as China. To coupe with this we could try to weight the data based on population.
+
+
+```{r, warning=FALSE}
+gapminder %>% 
+  mutate(decade=floor(year/10)*10) %>% 
+  #filter(decade %in% c(max(decade), min(decade))) %>% 
+  ggplot(aes(x=lifeExp)) + 
+  geom_density(aes(weight=pop, 
+                   fill=factor(decade), 
+                   color=factor(decade)), 
+               alpha=0.05) + 
+  xlim(20,90) + xlab("Life Expectancy") + ylab("Estimated Density")
+```
+
+This did not work. As you can see, the distribution surely doesn't integrate to 1, and the total weight of the distribution increases over the decades. We clearly need a proportional population variable, which sums to 1 for each decade. This can be done in the following way
+
+
+```{r, warning=FALSE}
+p <- gapminder %>% 
+  mutate(decade=floor(year/10)*10) %>%
+  #filter(decade %in% c(max(decade), min(decade))) %>% 
+  group_by(decade) %>%
+  mutate(pop.density = pop/sum(as.numeric(pop)))
+  
+p %>% 
+  ggplot(aes(x=lifeExp)) + 
+  geom_density(aes(weight=pop.density, 
+                     fill=factor(decade), 
+                     color=factor(decade)), alpha=0.05) + 
+  xlim(20,90) + xlab("Life Expectancy") + ylab("Estimated Density")
+```
+
+Add group_by(decade) makes sum(as.numeric(pop)) sum over each decade. Therefore, the elements of pop.density for a given decade now sums to one. This can also be confirmed by
+```{r}
+p %>% 
+  group_by(decade) %>% 
+  summarize(sum.pop.density = sum(pop.density))
+```
+
+
+
+It seems like the shift in life expecancy is much better than previously anticitpated, which is really nice! Further, one can try to plot the quantiles of the life expecancy. Below, the median and a quantile based 80% confidence interval is plotted. As one can see, the median life expecancy is increasing much faster than the 10 and 90 percent quantiles. This indicates that there is not much to gain once you have a high life expectancy, and there still are countries struggeling with increasing their life expectancy. 
 
 
 
@@ -129,20 +212,24 @@ p2 <- gapminder %>%
 
 p2 + 
   geom_ribbon(aes(ymin=q.1, ymax=q.9),fill='black',alpha=0.2) +
-  geom_line(aes(y=q.5),size=0.5,color='red')
+  geom_line(aes(y=q.5),size=0.5,color='red') + 
+  xlab("Year") + ylab("Life Expectancy")
 ```
 
 
+## 2.3 Afghanistan and Rwanda
+[*Back to the top*](#abstract)
 
-
+So someone tried to extract the data from Afghanistan and Rwanda with the following code.
 ```{r}
-p4 <- gapminder %>% 
-  group_by(continent) %>% 
-  ggplot(aes(x=year, y=pop))
-
-#p4 + geom_histogram(position='fill')
+filter(gapminder, country == c("Rwanda", "Afghanistan"))
 ```
 
-
-
-
+It would seem like the extraction worked. However, notice that there are only 12 data points, while it shoud be 24. As one can see, only the data with year ending with 7 is from Afghanistan while only the data with year ending with 2 is from Rwanda. So why is this? The statement 
+```{r,eval=FALSE}
+country == c("Rwanda", "Afghanistan")
+```
+tries to compare two vectors of different lengths. This is done by repeating the right side until it has the same length as the right side. Therefore, the code will only include a data point, if its index is odd and its country is Rwanda, or if its index is even and its country is Afghanistan. The correct way to extract all data points from Rwanda and Afghanistan would be to use the %in% operator.
+```{r}
+filter(gapminder, country %in% c("Rwanda", "Afghanistan"))
+```
