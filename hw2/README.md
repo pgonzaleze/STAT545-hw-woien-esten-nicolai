@@ -4,9 +4,9 @@
 Relevant files:
 
 * [Gapminder-Exploration.md](Gapminder-Exploration.md)
-* [Gapminder Exploration.Rmd](Gapminder Exploration.Rmd)
+* [Gapminder Exploration.Rmd](Gapminder%20Exploration.Rmd)
 
-This is the folder for homework 2 in STAT 545. The final product of the work can be found in the file [Gapminder-Exploration.md](Gapminder-Exploration.md). R Markdown were used to produce the document, and the raw R Markdown file can be found [here](Gapminder Exploration.Rmd).
+This is the folder for homework 2 in STAT 545. The final product of the work can be found in the file [Gapminder-Exploration.md](Gapminder-Exploration.md). R Markdown were used to produce the document, and the raw R Markdown file can be found [here](Gapminder%20Exploration.Rmd).
 
 ## Process Report
 
