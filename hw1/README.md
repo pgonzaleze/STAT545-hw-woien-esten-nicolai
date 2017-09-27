@@ -1,22 +1,4 @@
 # STAT545 Homework 1
-*An improper introduction to Esten Nicolai Wøien (or with an o if you perfer)*
-
-I'm a Norwegian visiting student, studying statistics for a year at UBC. I'm in a physics and mathematics program, but specialize in computational learning theory as it is a nice combination of
-
-+ **Math**
-    - Optimization
-    - Convergence of methods
-+ **Computer science**
-    - Implementation
-    - Method complexity
-+ **Statistics**
-    - Classification
-    - Regression
-    - Simulation
-
-On non-school related interests, I love to hike, run, ski (cross-contry, alpine, telemark, randonee, anything), orienteering, and so fourth. I.e. all fun outdoor activities. 
-
-
 ### How I changed the documents in the repo
 
 1. Initialized the repo with a README
