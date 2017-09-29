@@ -1,0 +1,59 @@
+---
+title: "More Gapminder Exploration"
+output: html_document
+---
+
+```{r}
+library(gapminder)
+library(tidyverse)
+```
+
+
+## Task 1
+*Report the absolute and/or relative abundance of countries with low life expectancy over time by continent: Compute some measure of worldwide life expectancy – you decide – a mean or median or some other quantile or perhaps your current age. Then determine how many countries on each continent have a life expectancy less than this benchmark, for each year.*
+
+
+http://ggplot2.tidyverse.org/reference/geom_dotplot.html
+https://stackoverflow.com/questions/6999144/how-do-you-create-a-bar-plot-for-two-variables-mirrored-across-the-x-axis-in-r
+```{r}
+lifeExpTreshold = 50
+#gapminder %>% 
+#  mutate(acceptableLifeExp = lifeExp>=lifeExpTreshold) %>% 
+#  ggplot(aes(x=factor(year), y=lifeExp)) +
+#  geom_dotplot(stackgroups = TRUE,
+#               stackdir='centerwhole', 
+#               binaxis='y', 
+#               binwidth=0.6)
+  
+gapminder %>% 
+  ggplot(aes(x=year, y=gdpPercap*pop)) +
+  geom_point(aes(color=(country=='United States'))) +
+  scale_y_log10()
+```
+
+
+
+
+Let's calculate the life 10% percentile life expectancy for the world. To do this, we cannot simly use R's quantile function, as we need weighted quantiles
+
+
+problem 1: computes the quantile for the first year, and uses that year as the quantile for all years
+
+```{r}
+source('code/Weighted Quantile.R')
+dat <- gapminder %>% 
+  group_by(year) %>% 
+  mutate(lifeExp.10 = weighted.quantile(lifeExp, weight=as.numeric(pop), probs=0.0)) %>% 
+  ungroup()
+
+dat %>% 
+  ggplot(aes(x=year)) +
+  geom_line(aes(y=lifeExp, group=country),alpha=0.1) +
+  geom_line(aes(y=lifeExp.10))
+  
+```
+
+
+
+
+
