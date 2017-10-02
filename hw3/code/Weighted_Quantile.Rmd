@@ -1,3 +1,19 @@
+---
+title: "Code documentation"
+output: html_document
+---
+
+### Abstract
+This document includes documentation of the functions constructed for the purpose.
+
+### Table of Content
+
+
+
+## Weighted Quantile
+
+
+```{r, eval=FALSE}
 weighted.quantile <- function(x, probs=seq(0, 1 ,0.25), weight=rep(1,length(x))) {
   
   x <- sort(x)
@@ -18,3 +34,8 @@ weighted.quantile <- function(x, probs=seq(0, 1 ,0.25), weight=rep(1,length(x)))
   }
   return(quantiles)
 }
+
+```
+
+The weighted quantile is computed with the inverse cumulative distribution method. The weights are normalized, and then considered 
+
