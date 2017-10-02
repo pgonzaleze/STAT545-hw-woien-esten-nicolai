@@ -3,11 +3,18 @@ title: "More Gapminder Exploration"
 output: github_document
 ---
 
-```{r, message=FALSE, warning=FALSE}
+#### Table of content
+* 1 [Installation of packages](#installation_of_packages)
+
+
+## 1 Installation of packages
+```{r}
 library(gapminder)
 library(tidyverse)
-source('code/Weighted Quantile.R')
+source('hw3/code/Weighted Quantile.R')
 ```
+
+We will analyse the gapminder dataset using dplyr and ggplot from tidyverse. We will also be using 
 
 
 ## Task 1
@@ -22,9 +29,10 @@ Let's calculate the life 10% percentile life expectancy for the world. To do thi
 
 problem 1: computes the quantile for the first year, and uses that year as the quantile for all years
 
-https://stackoverflow.com/questions/10220510/summary-statistics-by-two-or-more-factor-variables
 
-First of all, lets manipulate the data, and add a field for the 10th percentile for life expectation. As the population of each country varies a lot, the percentile is weighted with the population. Click [here](code/Weighted_Quantile.md) to see how the weighted quantiles are computed. This is a bit technical, but we define the 10th percentile life expectancy as the following, 
+## 1.1 
+
+First of all, lets manipulate the data, and add a field for the 10th percentile for life expectation. As the population of each country varies a lot, the percentile is weighted with the population. Click [here](code/Weighted_Quantile.md) to see how the weighted quantiles are computed. This is a bit technical, but we use the 10th percentile life expectancy with the following definition
 
 *The 10th percentile life expectancy **q**, is such that 10 percent of the continent's population lives in a country with a lower or equal life expectancy than **q**, and 90 percent of the continent's population lives in a country with a higher or equal life expectancy than **q**. *
 
@@ -34,7 +42,7 @@ gapminder.without.Oceania <- gapminder %>%
   droplevels()                       # enough observations for computing quantiles
   
 
-# Group by year, such that we can compute the worlds 10th percentile life expectation for each year
+# Group by year, such that we can compute the world's 10th percentile life expectation for each year
 dat.world <- gapminder.without.Oceania %>%
   group_by(year) %>% 
   mutate(lifeExp.10 = weighted.quantile(lifeExp, weight=as.numeric(pop), probs=0.1))
@@ -126,12 +134,11 @@ gapminder %>%
 
 ```{r}
 gapminder %>% 
-  mutate(popChange = (pop - lag(pop,1))/pop) %>% 
-  filter(year != min(year)) %>% 
+  mutate(relativePopChange = (pop - lag(pop,1))/pop) %>% 
+  filter(year != min(year), abs(relativePopChange) < 0.25) %>% 
   group_by(continent, year) %>% 
-  ggplot(aes(x=year, y=popChange, color=continent)) + 
-  geom_point(alpha=0.3, aes(size=pop)) + 
-  geom_smooth(se=FALSE, aes(group=continent))
+  ggplot(aes(x=year, y=relativePopChange, color=continent)) + 
+  geom_point(alpha=0.3, aes(size=pop))
 ```
 
 
