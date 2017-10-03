@@ -4,7 +4,7 @@ output: github_document
 ---
 
 ### Abstract
-This document includes documentation of the functions constructed for the purpose.
+This document includes documentation of the functions constructed for the hw3 subfolder in the STAT 545 homework repo.
 
 ### Table of Content
 * [Weighted Quantile](#weighted_quantile)
@@ -12,7 +12,7 @@ This document includes documentation of the functions constructed for the purpos
 
 ## Weighted Quantile
 
-```{r, code = readLines('Weighted Quantile.R')}
+```{r, code = readLines('code/Weighted Quantile.R')}
 ```
 
 The weighted quantile is computed with the inverse cumulative distribution method. The weights are normalized, and then considered as probabilites assigned to corresponding elements in x. The cumulative sum of the weights is computed. Then, a iterative search for the desired probability in the vector of cumulative sum of weights determines where to extract the quantile. 

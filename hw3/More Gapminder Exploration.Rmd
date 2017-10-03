@@ -1,0 +1,189 @@
+---
+title: "More Gapminder Exploration"
+output: github_document
+---
+
+#### Table of content
+* 1 [Installation of packages](#installation_of_packages)
+
+
+## 1 Installation of packages
+```{r, warning=FALSE, message=FALSE}
+library(gapminder)
+library(tidyverse)
+library(scales) 
+source('code/Weighted Quantile.R')
+
+```
+
+We will analyse the gapminder dataset using dplyr and ggplot from tidyverse. We will also be using ggplots hue palette obtained from the scales library, and a custom made weighted quantile function. The documentation for the weighted quantiles function can be found in the 
+
+
+## Task 1
+*Report the absolute and/or relative abundance of countries with low life expectancy over time by continent: Compute some measure of worldwide life expectancy – you decide – a mean or median or some other quantile or perhaps your current age. Then determine how many countries on each continent have a life expectancy less than this benchmark, for each year.*
+
+
+
+
+
+Let's calculate the life 10% percentile life expectancy for the world. To do this, we cannot simly use R's quantile function, as we need weighted quantiles
+
+
+problem 1: computes the quantile for the first year, and uses that year as the quantile for all years
+
+## 2 Fun with Data
+#### 2.1 20th Percentile Life Expectancy
+
+First of all, lets manipulate the data, and add a field for the 20th percentile for life expectation (abbreviated 20th percentile from now on). As the population of each country varies a lot, the percentile is weighted with the population. Click [here](code/Weighted_Quantile.md) to see how the weighted quantiles are computed. This is a bit technical, but we use the 20th percentile with the following definition
+
+*The 20th percentile **q**, is such that 10 percent of the continent's population lives in a country with a lower or equal life expectancy than **q**, and 90 percent of the continent's population lives in a country with a higher or equal life expectancy than **q**. *
+
+```{r, warning=FALSE}
+# Start with the gapminder dataset
+gapminder.without.Oceania <- gapminder %>% 
+  
+# filter out Oceania as we don't have enough observations for computing quantiles
+  filter(continent != 'Oceania') %>% 
+  
+# continent is a factor variable, and droplevels() makes sure that Oceania is removed as an option
+  droplevels()                       
+```
+
+```{r, warning=FALSE}
+# compute the 20th percentile for the world for each year
+dat.world <- gapminder.without.Oceania %>%
+  group_by(year) %>% 
+  mutate(lifeExp.20 = weighted.quantile(lifeExp, weight=as.numeric(pop), probs=0.2))
+```
+
+```{r, warning=FALSE}
+# compute the 20th percentile for each continent and each year
+dat <- gapminder.without.Oceania %>% 
+  group_by(continent, year)      %>% 
+  mutate(lifeExp.20 = weighted.quantile(lifeExp, weight=as.numeric(pop), probs=0.2)) %>% 
+              
+# and add the world's 20th percentile to the data
+  ungroup() %>%     
+  add_row(continent='World', year=dat.world$year, lifeExp.20=dat.world$lifeExp.20)
+```
+
+We use kable to display the data we just created
+
+```{r}
+dat %>% 
+
+# calculate the mean of the 20th percentile for each continent and each year
+  with(tapply(lifeExp.20, list(continent, year), mean)) %>% 
+  
+# and present the data
+  knitr::kable()
+```
+
+And this data is plotted, together with the life expectancy for each country.
+```{r}
+# start with our already filtered data
+dat %>% 
+  ggplot(aes(x=year, color=continent)) + 
+  geom_line(aes(y=lifeExp,group=country),
+            alpha=0.1) + 
+  
+# add a separate line style to the "world" data
+  geom_line(size=1,
+            aes(y=lifeExp.20, 
+                linetype=(continent=='World'))) + 
+
+# add color with equal chroma=65, luma=100 but different hue for the continents,
+# and black color for the world
+  scale_color_manual(values=c(hcl(h=15+seq(0,3)*360/5,c=100,l=65), 'black')) +
+  
+# add title and axis labels
+  labs(title='20th Percentile Life Expectancy', x='Year', y='Life Expectancy') 
+```
+
+
+
+This plot tells us alot. We might just have to explore this plot.
+
+#### 2.1.1 Asia and the World
+Notice how the 20th percentile is the very same for Asia and for the World. This seems 
+
+
+notice that in the 90s, the 20th percentile life expectancy in Africa stops to increase. This does not follow the rest of the world's trend, but can be explained by the outbreak of HIV and Aids. In addition, ovserve that almost all countries lower than the world's 20th percentile life expectation are African. 
+
+
+https://stackoverflow.com/questions/6999144/how-do-you-create-a-bar-plot-for-two-variables-mirrored-across-the-x-axis-in-r
+https://stackoverflow.com/questions/13734368/ggplot2-and-a-stacked-bar-chart-with-negative-values
+```{r}
+dat %>% 
+  group_by(year,continent) %>% 
+  mutate(pop = pop/sum(as.numeric(pop))) %>% 
+  group_by(year) %>% 
+  mutate(pop.over  = pop*(lifeExp>=lifeExp.20[continent=='World']),
+         pop.under = pop*(lifeExp< lifeExp.20[continent=='World'])) %>% 
+  filter(continent != 'World') %>% 
+  group_by(year,continent) %>%
+  summarize(pop.under = sum(pop.under), pop.over = sum(pop.over)) %>% 
+  
+  ggplot(aes(x=factor(year))) +
+  geom_bar(aes(y=pop.under, group=continent, fill=continent), stat='identity', position='stack')
+```
+
+
+
+```{r}
+dat %>% 
+  group_by(year,continent) %>% 
+  mutate(pop = pop/sum(as.numeric(pop))) %>% 
+  group_by(year) %>% 
+  mutate(pop.over  = pop*(lifeExp>=lifeExp.20[continent=='World']),
+         pop.under = pop*(lifeExp< lifeExp.20[continent=='World'])) %>% 
+  filter(continent != 'World')
+```
+
+
+```{r}
+gapminder %>% 
+  mutate(lifeExpChange = lifeExp - lag(lifeExp,1),
+         didDecrease = pop*(lifeExpChange<0)) %>% 
+  filter(year != min(year)) %>% 
+  group_by(continent, year) %>% 
+  summarize(s=sum(didDecrease)) %>% 
+  ggplot(aes(x=year+2.5, y=s+0.0*(s==0), fill=continent)) + 
+  geom_histogram(stat='identity', position='stack') +
+  scale_x_continuous(breaks=seq(1952,2007,5))
+```
+
+
+
+
+```{r}
+gapminder %>% 
+  mutate(lifeExpChange = lifeExp - lag(lifeExp,1),
+         didDecrease = lifeExpChange<0) %>% 
+  filter(year != min(year)) %>% 
+  group_by(continent, year) %>% 
+  summarize(s=sum(didDecrease)) %>% 
+  ggplot(aes(x=year, y=s+0.0*(s==0), fill=continent)) + 
+  geom_histogram(stat='identity', position='stack')
+```
+
+```{r}
+gapminder %>% 
+  mutate(relativePopChange = (pop - lag(pop,1))/pop) %>% 
+  filter(year != min(year), abs(relativePopChange) < 0.25) %>% 
+  group_by(continent, year) %>% 
+  ggplot(aes(x=year, y=relativePopChange, color=continent)) + 
+  geom_point(alpha=0.3, aes(size=pop))
+```
+
+```{r}
+gapminder %>% 
+  filter(continent == 'Europe') %>% 
+  group_by(year) %>% 
+  mutate(pop = pop/sum(pop)) %>% 
+  ggplot(aes(x=year, y=lifeExp, group=country, size=pop)) +
+  geom_point(alpha=0.5)
+```
+
+
+

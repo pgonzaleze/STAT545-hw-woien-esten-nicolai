@@ -1,10 +1,15 @@
 weighted.quantile <- function(x, probs=seq(0, 1 ,0.25), weight=rep(1,length(x))) {
   
-  id <- sort(x, index.return=TRUE) # Sort x and obtain the original indices
-  #weight     <- weight[id]         # Sort the weights based on the sorting of x
+  
+  
+  #id <- order(x)
+  #sort(x)
+  dat <- sort(x, index.return=TRUE) # Sort x and obtain the original indices
+  x   <- dat$x
+  weight     <- weight[dat$ix]          # Sort the weights based on the sorting of x
   n.probs    <- length(probs)
   quantiles  <- numeric(n.probs)
-  cum.weight <- cumsum(weight)     # Cumulative sum of the weights
+  cum.weight <- cumsum(weight)      # Cumulative sum of the weights
   cum.weight <- cum.weight/tail(cum.weight,n=1) # then normalized
   
   # For each quantile we want to compute
