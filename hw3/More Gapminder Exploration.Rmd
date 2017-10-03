@@ -7,6 +7,21 @@ output: github_document
 * 1 [Installation of packages](#installation_of_packages)
 
 
+<style>
+.column-left{
+  float: left;
+  width: 50%;
+  text-align: left;
+}
+.column-right{
+  float: right;
+  width: 49%;
+  text-align: left;
+}
+</style>
+
+
+
 ## 1 Installation of packages
 ```{r, warning=FALSE, message=FALSE}
 library(gapminder)
@@ -32,15 +47,17 @@ Let's calculate the life 10% percentile life expectancy for the world. To do thi
 problem 1: computes the quantile for the first year, and uses that year as the quantile for all years
 
 ## 2 Fun with Data
+Let's have some fune with the gapminder data. I'll assume 
+
 #### 2.1 20th Percentile Life Expectancy
 
 First of all, lets manipulate the data, and add a field for the 20th percentile for life expectation (abbreviated 20th percentile from now on). As the population of each country varies a lot, the percentile is weighted with the population. Click [here](code/Weighted_Quantile.md) to see how the weighted quantiles are computed. This is a bit technical, but we use the 20th percentile with the following definition
 
-*The 20th percentile **q**, is such that 10 percent of the continent's population lives in a country with a lower or equal life expectancy than **q**, and 90 percent of the continent's population lives in a country with a higher or equal life expectancy than **q**. *
+> The 20th percentile *q*, is such that 10 percent of the continent's population lives in a country with a lower or equal life expectancy than *q*, and 90 percent of the continent's population lives in a country with a higher or equal life expectancy than *q*.
 
 ```{r, warning=FALSE}
 # Start with the gapminder dataset
-gapminder.without.Oceania <- gapminder %>% 
+gapminder <- gapminder %>% 
   
 # filter out Oceania as we don't have enough observations for computing quantiles
   filter(continent != 'Oceania') %>% 
@@ -49,55 +66,51 @@ gapminder.without.Oceania <- gapminder %>%
   droplevels()                       
 ```
 
-```{r, warning=FALSE}
-# compute the 20th percentile for the world for each year
-dat.world <- gapminder.without.Oceania %>%
-  group_by(year) %>% 
-  mutate(lifeExp.20 = weighted.quantile(lifeExp, weight=as.numeric(pop), probs=0.2))
+```{r, messages=FALSE, warning=FALSE}
+# compute the 20th percentile for each continent and each year
+percentile.data <- gapminder %>% 
+  group_by(continent, year)      %>% 
+  summarize(lifeExp = weighted.quantile(lifeExp, weight=as.numeric(pop), probs=0.2)) %>% 
+  
+  
+# and add the world's 20th percentile to the data  
+  full_join(gapminder %>%
+              group_by(year) %>% 
+              summarize(continent = 'World', 
+                        lifeExp = weighted.quantile(lifeExp, weight=as.numeric(pop), probs=0.2)))
 ```
 
-```{r, warning=FALSE}
-# compute the 20th percentile for each continent and each year
-dat <- gapminder.without.Oceania %>% 
-  group_by(continent, year)      %>% 
-  mutate(lifeExp.20 = weighted.quantile(lifeExp, weight=as.numeric(pop), probs=0.2)) %>% 
-              
-# and add the world's 20th percentile to the data
-  ungroup() %>%     
-  add_row(continent='World', year=dat.world$year, lifeExp.20=dat.world$lifeExp.20)
-```
 
 We use kable to display the data we just created
 
 ```{r}
-dat %>% 
-
-# calculate the mean of the 20th percentile for each continent and each year
-  with(tapply(lifeExp.20, list(continent, year), mean)) %>% 
+percentile.data %>% 
+  
+# spread the 20th percentile on a table with continent rows and year columns
+  spread(key=year, value=lifeExp) %>% 
   
 # and present the data
-  knitr::kable()
+  knitr::kable(digits=1)
 ```
 
 And this data is plotted, together with the life expectancy for each country.
 ```{r}
-# start with our already filtered data
-dat %>% 
-  ggplot(aes(x=year, color=continent)) + 
-  geom_line(aes(y=lifeExp,group=country),
-            alpha=0.1) + 
-  
-# add a separate line style to the "world" data
-  geom_line(size=1,
-            aes(y=lifeExp.20, 
-                linetype=(continent=='World'))) + 
+# plot the life expectancy for each year
+ggplot(gapminder,aes(x=year, y=lifeExp, color=continent)) + 
+  geom_line(alpha=0.1,
+            aes(group=country)) +
 
-# add color with equal chroma=65, luma=100 but different hue for the continents,
-# and black color for the world
-  scale_color_manual(values=c(hcl(h=15+seq(0,3)*360/5,c=100,l=65), 'black')) +
+# add the continent wise 20th precentile
+  geom_line(data=percentile.data,
+            size=1,
+            aes(linetype=(continent=='World'))) + 
+
+# add color with chroma=65, luma=100 but different hue for the different continents, and black color for the world
+  scale_color_manual(values=c(hcl(h=15+seq(0,3)*360/5,c=100,l=65), 'black'), 'Continent') +
   
 # add title and axis labels
-  labs(title='20th Percentile Life Expectancy', x='Year', y='Life Expectancy') 
+  labs(title='20th Percentile Life Expectancy', x='Year', y='Life Expectancy')
+
 ```
 
 
@@ -105,7 +118,73 @@ dat %>%
 This plot tells us alot. We might just have to explore this plot.
 
 #### 2.1.1 Asia and the World
-Notice how the 20th percentile is the very same for Asia and for the World. This seems 
+Notice how the 20th percentile is the very same for Asia and for the World. This cannot be coincidental. The 20th percentile is defined on a non-interpolating manner, so each 20th percentile belongs to the life expectancy of one country. The country might differ from year to year, but it's worth checking. Consider the two largest countries in Asia, China and India.
+
+```{r}
+asia.and.the.world.data <- 
+  percentile.data %>% 
+  mutate(country=continent) %>% 
+  full_join(gapminder) %>% 
+  filter(country %in% c('China','India','World'))%>% 
+  select(year, country, lifeExp) 
+  
+asia.and.the.world.data %>% 
+  spread(key=year,value=lifeExp) %>% 
+  knitr::kable(digits=1)
+```
+
+Due to its size, India is in some sence determining the 20th percentile. But why is the 20th percentile 100% correlated with India? One way to understand this is in terms of population size. Let's compute the relative populations of China and India
+
+
+```{r, eval=FALSE}
+relative.pop <- gapminder %>% 
+  group_by(year) %>% 
+  summarize(China = pop[country=='China']/sum(as.numeric(pop)),
+            India = pop[country=='India']/sum(as.numeric(pop)),
+            World = 1-China-India)
+
+relative.pop %>% 
+  knitr::kable(digits = 2)
+
+gapminder %>% 
+  mutate(country = factor(country=='China'))
+```
+
+
+
+
+
+```{r results = 'asis', echo=FALSE}
+relative.pop.size <- gapminder %>% 
+  
+# calculate the relative population for each year
+  group_by(year) %>% 
+  mutate(pop = pop/sum(as.numeric(pop))) %>% 
+  filter(country %in% c('China', 'India')) %>% 
+  droplevels()
+
+relative.pop.size.world <- relative.pop.size %>% 
+  summarize(pop = 1-sum(pop)) 
+
+relative.pop.size <- relative.pop.size%>% 
+  ungroup() %>% 
+  add_row(country="The rest of the world",
+          pop =relative.pop.size.world$pop, 
+          year=relative.pop.size.world$year) 
+
+relative.pop.size %>% 
+  with(tapply(pop, list(year, country), mean)) %>% 
+  knitr::kable(digits=2)
+```
+
+```{r echo=FALSE}
+relative.pop.size %>% 
+  ggplot(aes(x=year,y=pop,fill=country)) + 
+  geom_histogram(stat='identity')
+```
+
+
+As one can see, China and India has roughly 40% of the world's population. Therefore, for a random year, it's a 40% probability that the quantile corresponding to a randomly chosen percentile falls in either China or India. Considering tat different countries has very correlated life expectancies, after all it's not suprising that the 20th percentile follows India precicely. 
 
 
 notice that in the 90s, the 20th percentile life expectancy in Africa stops to increase. This does not follow the rest of the world's trend, but can be explained by the outbreak of HIV and Aids. In addition, ovserve that almost all countries lower than the world's 20th percentile life expectation are African. 
@@ -114,31 +193,36 @@ notice that in the 90s, the 20th percentile life expectancy in Africa stops to i
 https://stackoverflow.com/questions/6999144/how-do-you-create-a-bar-plot-for-two-variables-mirrored-across-the-x-axis-in-r
 https://stackoverflow.com/questions/13734368/ggplot2-and-a-stacked-bar-chart-with-negative-values
 ```{r}
-dat %>% 
+# Lets do some real data manipulation shall we?
+# Normalize the population in terms of year and continent
+worse.life.exp <- 
+  gapminder %>% 
   group_by(year,continent) %>% 
-  mutate(pop = pop/sum(as.numeric(pop))) %>% 
+  mutate(pop = pop/sum(as.numeric(pop), na.rm=TRUE)) %>% 
+  
+# Add the world's 20th percentile life expectancy to the gapminder data
+  full_join(percentile.data) %>% 
+
+# Map all populations for contries where the life expectancy is highar than the worlds 20th percentile, to 0
   group_by(year) %>% 
-  mutate(pop.over  = pop*(lifeExp>=lifeExp.20[continent=='World']),
-         pop.under = pop*(lifeExp< lifeExp.20[continent=='World'])) %>% 
+  mutate(pop = pop*(lifeExp <= lifeExp[continent=='World'])) %>% 
+
+# Remove the world continent, and sum all populations with lower life exepctancies thant 20th
   filter(continent != 'World') %>% 
   group_by(year,continent) %>%
-  summarize(pop.under = sum(pop.under), pop.over = sum(pop.over)) %>% 
-  
+  summarize(pop = sum(pop, na.rm=TRUE))
+
+worse.life.exp %>% 
+  group_by(year, continent) %>% 
+  mutate(pop = paste0(round(100 * sum(pop, na.rm=TRUE), 0), "%")) %>% 
+  spread(key=year, value=pop) %>% 
+  knitr::kable()
+
+worse.life.exp %>% 
   ggplot(aes(x=factor(year))) +
-  geom_bar(aes(y=pop.under, group=continent, fill=continent), stat='identity', position='stack')
+  geom_bar(aes(y=pop, group=continent, fill=continent), stat='identity', position='dodge')
 ```
 
-
-
-```{r}
-dat %>% 
-  group_by(year,continent) %>% 
-  mutate(pop = pop/sum(as.numeric(pop))) %>% 
-  group_by(year) %>% 
-  mutate(pop.over  = pop*(lifeExp>=lifeExp.20[continent=='World']),
-         pop.under = pop*(lifeExp< lifeExp.20[continent=='World'])) %>% 
-  filter(continent != 'World')
-```
 
 
 ```{r}
