@@ -11,3 +11,5 @@ I spent way to much time on this homework. I found it so entertaining to just se
 I find myself comfortable with using almost everything in ggplot2. I had a few challenges, for example how to arrange the contries by life expectancy in the bar plots in section 2.1.3, but I discovered a "quick fix", namely ```group = -lifeExp```. 
 
 I started out traversing the internet for solutions to my problems. But the problems I had were very specific, so I realized that it was both more efficient and helpful to read the documentation and go to office hours. Shoutout to TAs and Vincenzo for being great intstuctors!
+
+A final note. I made a lot of trouble with using the 20th percentile life expectation. Not because of technical problems, but problems with explaining what I was trying to visualize. Perhaps I should have gone with the weighted median or some other easily understandable variable. The reason to stick with the 20th percentile was the nice results I got, which encouraged more exploration! 
