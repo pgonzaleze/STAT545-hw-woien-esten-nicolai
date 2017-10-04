@@ -36,7 +36,7 @@ Let's have some fune with the gapminder data.
 
 [*Back to the top*](#abstract)
 
-We will judge the life expectancy for each country as the 20th percentile. The *20th* percentile is a number taken out of thin air, but if 80% of the population has a good life expectancy, the continent is in overall good shape. So first of all, lets manipulate the data, and add a field for the 20th percentile for life expectation (abbreviated 20th percentile from now on). As the population of each country varies a lot, the percentile is weighted with the population. Click [here](Weighted_Quantile.md) to see how the weighted quantiles are computed. This is a bit technical, but we use the 20th percentile with the following definition
+We will judge the life expectancy for each country as the 20th percentile. The *20th* percentile is a number taken out of thin air, but if 80% of the population has a good life expectancy, the continent is in overall good shape. So first of all, lets manipulate the data, and add a field for the 20th percentile for life expectation (abbreviated 20th percentile from now on). As the population of each country varies a lot, the percentile is weighted with the population. Click [here](Code_Documentation.md) to see how the weighted quantiles are computed. This is a bit technical, but we use the 20th percentile with the following definition
 
 > The 20th percentile *q*, is such that 20 percent of the continent's population lives in a country with a lower or equal life expectancy than *q*, and 80 percent of the continent's population lives in a country with a higher or equal life expectancy than *q*.
 
