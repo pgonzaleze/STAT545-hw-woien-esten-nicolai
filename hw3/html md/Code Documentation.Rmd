@@ -12,7 +12,7 @@ This document includes documentation of the functions constructed for the hw3 su
 
 ## Weighted Quantile
 
-```{r, code = readLines('code/Weighted Quantile.R')}
+```{r, code = readLines('../code/Weighted Quantile.R')}
 ```
 
 The weighted quantile is computed with the inverse cumulative distribution method. The weights are normalized, and then considered as probabilites assigned to corresponding elements in x. The cumulative sum of the weights is computed. Then, a iterative search for the desired probability in the vector of cumulative sum of weights determines where to extract the quantile. 
